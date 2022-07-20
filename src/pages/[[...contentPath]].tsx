@@ -23,13 +23,15 @@ const query = `query($path: ID) {
                 }`;
 
 export async function getStaticProps(context: Context) {
+    const path = context.previewData?.contentPath || context.params?.contentPath || [];
+    console.info(`getStaticProps (preview=${context.preview}): ${context.previewData?.contentPath}`);
     const {
         common = null,
         data = null,
         meta,
         error = null,
         page = null,
-    } = await fetchContent(context.params?.contentPath || [], context);
+    } = await fetchContent(path, context);
 
     // HTTP 500
     if (error && error.code === '500') {
@@ -49,7 +51,7 @@ export async function getStaticProps(context: Context) {
     return {
         notFound: (error && error.code === '404') || context.res?.statusCode === 404 || catchAllInNextProdMode || undefined,
         props,
-        revalidate: 60 * 60 // ISR every hour
+        revalidate: false,
     }
 }
 
